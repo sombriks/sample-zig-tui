@@ -4,6 +4,14 @@
     .fingerprint = 0x6767e375adffaa57, // Changing this has security and trust implications.
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
+        .zigzag = .{
+            .url = "git+https://github.com/sombriks/zigzag?ref=main#2fd20276f76536f31c07f1fb9d4294c31a60e3d9",
+            .hash = "zigzag-0.1.6-YXwYS2ACEwAY7kyMKr2XUXRO19M0WYPP4omzFPetQQzb",
+        },
+        .pg = .{
+            .url = "git+https://github.com/karlseguin/pg.zig?ref=master#1ca2d58d412af038254da5a67882c5b68977c34a",
+            .hash = "pg-0.0.0-Wp_7gY0XBwAT4SpnVT7CjXE5IbUUWMpUy10L_BkyPeg9",
+        },
     },
     .paths = .{
         "build.zig",
