@@ -9,8 +9,8 @@
             .hash = "zigzag-0.1.6-YXwYS2ACEwAY7kyMKr2XUXRO19M0WYPP4omzFPetQQzb",
         },
         .pg = .{
-            .url = "git+https://github.com/karlseguin/pg.zig?ref=master#1ca2d58d412af038254da5a67882c5b68977c34a",
-            .hash = "pg-0.0.0-Wp_7gY0XBwAT4SpnVT7CjXE5IbUUWMpUy10L_BkyPeg9",
+            .url = "git+https://github.com/sombriks/pg.zig?ref=master#284ce7cefeb0862d1e77d4e9b2b6497dd2007f9b",
+            .hash = "pg-0.0.0-Wp_7gbsXBwDeqybo2lMmbQTSzsice624Lew3SUYIK7lA",
         },
     },
     .paths = .{

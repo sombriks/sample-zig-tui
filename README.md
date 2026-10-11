@@ -28,7 +28,8 @@ mkdir -p src/infra
 touch src/infra/database.yml
 # as the time of this writing, i did a fork to fix a simple build issue
 zig fetch --save git+https://github.com/sombriks/zigzag#main
-zig fetch --save git+https://github.com/karlseguin/pg.zig#master
+# as the time of this writing, i did a fork to fix a simple dependency issue
+zig fetch --save git+https://github.com/sombriks/pg.zig#master
 ```
 
 ## How to build
