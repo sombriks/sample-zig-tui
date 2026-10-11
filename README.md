@@ -34,8 +34,20 @@ zig fetch --save git+https://github.com/sombriks/pg.zig#master
 
 ## How to build
 
+```bash
+zig build
+```
+
 ## How to test
 
+```bash
+zig build test
+```
+
 ## How to run
+
+```bash
+zig build run
+```
 
 ## Noteworthy
