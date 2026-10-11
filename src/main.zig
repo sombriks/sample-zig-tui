@@ -14,7 +14,8 @@ const Model = struct {
         key: KeyEvent,
     };
 
-    pub fn init(_: *Model, _: *Context) Cmd(Msg) {
+    pub fn init(model: *Model, _: *Context) Cmd(Msg) {
+        model.count = 0;
         return .none;
     }
 
@@ -25,9 +26,9 @@ const Model = struct {
                     .up => self.count += 1,
                     .down => self.count -= 1,
                     .escape => return .quit,
-                    else => {}
+                    else => {},
                 }
-            }
+            },
         }
         return .none;
     }
@@ -38,6 +39,10 @@ const Model = struct {
 };
 
 pub fn main(init: std.process.Init) !void {
+    const uri = try std.Uri.parse("postgresql://postgres:postgres@localhost:5432/sample");
+    const pool = try pg.Pool.initUri(init.io, init.gpa, uri, .{ .size = 5, .timeout = 10_000 });
+    defer pool.deinit();
+
     var program = Program(Model).init(init.gpa, init.io, init.environ_map);
     defer program.deinit();
     try program.run();
@@ -46,6 +51,5 @@ pub fn main(init: std.process.Init) !void {
 test "should create program" {
     // var program = Program(Model).init(std.testing.gpa, std.testing.io, std.testing.environ_map);
     // defer program.deinit();
-    std.testing.expect(true );
-
+    try std.testing.expect(true);
 }

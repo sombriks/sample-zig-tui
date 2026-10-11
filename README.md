@@ -47,8 +47,27 @@ zig build test
 
 ## How to run
 
+The sample application expects the [sample PostgreSQL database][db] up and 
+running. You can spin it up easily with the following command:
+
+[db]: src/infra/database.yml
+
+```bash
+zig build db
+```
+
+Then you can run the sample app:
+
 ```bash
 zig build run
 ```
 
 ## Noteworthy
+
+Zig 0.17.0 introduced less breaking changes when compared with 0.16.0. The 
+build/tooling changes where small.
+
+On the other hand, Evebted/IOUring remains broken, if in need of 
+high-performance concurrency, keep relying on [zio][zio].
+
+[zio]: https://github.com/lalinsky/zio
