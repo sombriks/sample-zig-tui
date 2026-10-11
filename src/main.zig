@@ -1,10 +1,13 @@
+// src/main.zig
 const std = @import("std");
 const zigzag = @import("zigzag");
 const pg = @import("pg");
 
-const KeyEvent = zigzag.KeyEvent;
-const Context = zigzag.Context;
+const Pool = pg.Pool;
+
 const Cmd = zigzag.Cmd;
+const Context = zigzag.Context;
+const KeyEvent = zigzag.KeyEvent;
 const Program = zigzag.Program;
 
 const Model = struct {
@@ -40,7 +43,7 @@ const Model = struct {
 
 pub fn main(init: std.process.Init) !void {
     const uri = try std.Uri.parse("postgresql://postgres:postgres@localhost:5432/sample");
-    const pool = try pg.Pool.initUri(init.io, init.gpa, uri, .{ .size = 5, .timeout = 10_000 });
+    const pool = try Pool.initUri(init.io, init.gpa, uri, .{ .size = 5 });
     defer pool.deinit();
 
     var program = Program(Model).init(init.gpa, init.io, init.environ_map);

@@ -1,4 +1,6 @@
-# A zig tale of TUI and DB
+# [A zig tale of TUI and DB][repo]
+
+[repo]: https://github.com/sombriks/sample-zig-tui
 
 Another zig experiment
 
@@ -64,7 +66,7 @@ zig build run
 
 ## Noteworthy
 
-Zig 0.17.0 introduced less breaking changes when compared with 0.16.0. The 
+Zig 0.17.0 introduced fewer breaking changes when compared with 0.16.0. The 
 build/tooling changes where small.
 
 On the other hand, Evebted/IOUring remains broken, if in need of 
