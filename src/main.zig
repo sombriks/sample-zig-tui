@@ -2,11 +2,50 @@ const std = @import("std");
 const zigzag = @import("zigzag");
 const pg = @import("pg");
 
-pub fn main(_: std.process.Init) !void {
-    std.debug.print("{any}\n", .{@TypeOf(zigzag)});
-    std.debug.print("{any}\n", .{@TypeOf(pg)});
+const KeyEvent = zigzag.KeyEvent;
+const Context = zigzag.Context;
+const Cmd = zigzag.Cmd;
+const Program = zigzag.Program;
+
+const Model = struct {
+    count: i32 = 0,
+
+    pub const Msg = union(enum) {
+        key: KeyEvent,
+    };
+
+    pub fn init(_: *Model, _: *Context) Cmd(Msg) {
+        return .none;
+    }
+
+    pub fn update(self: *Model, msg: Msg, _: *Context) Cmd(Msg) {
+        switch (msg) {
+            .key => |k| {
+                switch (k.key) {
+                    .up => self.count += 1,
+                    .down => self.count -= 1,
+                    .escape => return .quit,
+                    else => {}
+                }
+            }
+        }
+        return .none;
+    }
+
+    pub fn view(self: *const Model, ctx: *const Context) ![]const u8 {
+        return try std.fmt.allocPrint(ctx.allocator, "{d}", .{self.count});
+    }
+};
+
+pub fn main(init: std.process.Init) !void {
+    var program = Program(Model).init(init.gpa, init.io, init.environ_map);
+    defer program.deinit();
+    try program.run();
 }
 
-test "should pass" {
-    try std.testing.expect(true);
+test "should create program" {
+    // var program = Program(Model).init(std.testing.gpa, std.testing.io, std.testing.environ_map);
+    // defer program.deinit();
+    std.testing.expect(true );
+
 }
