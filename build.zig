@@ -12,17 +12,15 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
-    // dep config: zigzag
-    exe.root_module.addImport("zigzag", b.dependency("zigzag", .{
-        .target = target,
-        .optimize = optimize,
-    }).module("zigzag"));
-    // dep config: pg
-    exe.root_module.addImport("pg", b.dependency("pg", .{
-        .target = target,
-        .optimize = optimize,
-    }).module("pg"));
-    // default target
+    // deps config
+    const deps = [_][]const u8{ "zigzag", "pg" };
+    for (deps) |dep| {
+        exe.root_module.addImport(dep, b.dependency(dep, .{
+            .target = target,
+            .optimize = optimize,
+        }).module(dep));
+    }
+    // default target: install
     b.installArtifact(exe);
     // custom step: run
     const run_step = b.step("run", "Run the app");
@@ -37,4 +35,8 @@ pub fn build(b: *std.Build) void {
     const run_exe_tests = b.addRunArtifact(exe_tests);
     const test_step = b.step("test", "Run tests");
     test_step.dependOn(&run_exe_tests.step);
+    // custom step: clean
+    const clean_cmd = b.addSystemCommand(&.{ "rm", "-rf", ".zig-cache", "zig-pkg", "zig-out/" });
+    const clean_step = b.step("clean", "wipe the kitchen");
+    clean_step.dependOn(&clean_cmd.step);
 }

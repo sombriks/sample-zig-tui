@@ -35,6 +35,7 @@ zig fetch --save git+https://github.com/sombriks/pg.zig#master
 ## How to build
 
 ```bash
+zig build clean
 zig build
 ```
 

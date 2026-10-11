@@ -8,7 +8,5 @@ pub fn main(_: std.process.Init) !void {
 }
 
 test "should pass" {
-    std.debug.print("{any}\n", .{@TypeOf(zigzag)});
-    std.debug.print("{any}\n", .{@TypeOf(pg)});
     try std.testing.expect(true);
 }
