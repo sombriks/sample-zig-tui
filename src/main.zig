@@ -6,23 +6,31 @@ const pg = @import("pg");
 const Pool = pg.Pool;
 
 const Cmd = zigzag.Cmd;
+const Tick = zigzag.msg.Tick;
 const Context = zigzag.Context;
-const KeyEvent = zigzag.KeyEvent;
 const Program = zigzag.Program;
+const KeyEvent = zigzag.KeyEvent;
+const AsyncRunner = zigzag.AsyncRunner;
 
-const Model = struct {
-    count: i32 = 0,
+const TodoModel = struct {
+    count: i32,
+    pool: ?*Pool,
+    task: AsyncRunner(Msg),
 
+    // this one MUST be called Msg
     pub const Msg = union(enum) {
         key: KeyEvent,
+        tick: Tick,
     };
 
-    pub fn init(model: *Model, _: *Context) Cmd(Msg) {
+    pub fn init(model: *TodoModel, ctx: *Context) Cmd(Msg) {
         model.count = 0;
+        model.pool = null;
+        model.task = AsyncRunner(Msg).init(ctx.persistent_allocator);
         return .none;
     }
 
-    pub fn update(self: *Model, msg: Msg, _: *Context) Cmd(Msg) {
+    pub fn update(self: *TodoModel, msg: Msg, _: *Context) Cmd(Msg) {
         switch (msg) {
             .key => |k| {
                 switch (k.key) {
@@ -32,11 +40,14 @@ const Model = struct {
                     else => {},
                 }
             },
+            .tick => {
+                return .none;
+            },
         }
         return .none;
     }
 
-    pub fn view(self: *const Model, ctx: *const Context) ![]const u8 {
+    pub fn view(self: *const TodoModel, ctx: *const Context) ![]const u8 {
         return try std.fmt.allocPrint(ctx.allocator, "{d}", .{self.count});
     }
 };
@@ -46,8 +57,10 @@ pub fn main(init: std.process.Init) !void {
     const pool = try Pool.initUri(init.io, init.gpa, uri, .{ .size = 5 });
     defer pool.deinit();
 
-    var program = Program(Model).init(init.gpa, init.io, init.environ_map);
+    var program = Program(TodoModel).init(init.gpa, init.io, init.environ_map);
     defer program.deinit();
+
+    program.model.pool = pool;
     try program.run();
 }
 
