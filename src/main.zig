@@ -15,7 +15,7 @@ const AsyncRunner = zigzag.AsyncRunner;
 const TodoModel = struct {
     pool: *Pool,
     count: i32 = 0,
-    task: AsyncRunner(Msg) = undefined,
+    task: ?AsyncRunner(Msg) = null,
 
     // this one MUST be called Msg
     pub const Msg = union(enum) {
@@ -25,7 +25,23 @@ const TodoModel = struct {
 
     pub fn init(model: *TodoModel, ctx: *Context) Cmd(Msg) {
         model.task = AsyncRunner(Msg).init(ctx.persistent_allocator);
+        model.initDb() catch return .quit;
         return .none;
+    }
+
+    pub fn initDb(model: *TodoModel) !void {
+        const q =
+            \\create table if not exists todos (
+            \\  id serial primary key,
+            \\  description varchar not null,
+            \\  done boolean default false,
+            \\  created timestamp not null default now(),
+            \\  updated timestamp not null default now()
+            \\);
+            ;
+        var con = try model.pool.acquire();
+        defer con.release();
+        _ = try con.exec(q, .{});
     }
 
     pub fn update(self: *TodoModel, msg: Msg, _: *Context) Cmd(Msg) {
