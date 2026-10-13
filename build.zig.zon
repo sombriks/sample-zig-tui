@@ -5,11 +5,11 @@
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .zigzag = .{
-            .url = "git+https://github.com/sombriks/zigzag?ref=main#2fd20276f76536f31c07f1fb9d4294c31a60e3d9",
-            .hash = "zigzag-0.1.6-YXwYS2ACEwAY7kyMKr2XUXRO19M0WYPP4omzFPetQQzb",
+            .url = "git+https://github.com/sombriks/zigzag?ref=main#8cb26a1fd27a65aa61757b2d66d168c7eb91a5d4",
+            .hash = "zigzag-0.1.7-YXwYS8sjEwDBfyibZxgq4YMU-GRXD_qgtePvgGWZF3-g",
         },
         .pg = .{
-            .url = "git+https://github.com/sombriks/pg.zig?ref=master#284ce7cefeb0862d1e77d4e9b2b6497dd2007f9b",
+            .url = "git+https://github.com/sombriks/pg.zig?ref=master#cec59ca4ee2581ce41af5d4a0b7b1a273d16a801",
             .hash = "pg-0.0.0-Wp_7gbsXBwDeqybo2lMmbQTSzsice624Lew3SUYIK7lA",
         },
     },

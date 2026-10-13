@@ -13,9 +13,9 @@ const KeyEvent = zigzag.KeyEvent;
 const AsyncRunner = zigzag.AsyncRunner;
 
 const TodoModel = struct {
-    count: i32,
-    pool: ?*Pool,
-    task: AsyncRunner(Msg),
+    pool: *Pool,
+    count: i32 = 0,
+    task: AsyncRunner(Msg) = undefined,
 
     // this one MUST be called Msg
     pub const Msg = union(enum) {
@@ -24,8 +24,6 @@ const TodoModel = struct {
     };
 
     pub fn init(model: *TodoModel, ctx: *Context) Cmd(Msg) {
-        model.count = 0;
-        model.pool = null;
         model.task = AsyncRunner(Msg).init(ctx.persistent_allocator);
         return .none;
     }
@@ -57,10 +55,8 @@ pub fn main(init: std.process.Init) !void {
     const pool = try Pool.initUri(init.io, init.gpa, uri, .{ .size = 5 });
     defer pool.deinit();
 
-    var program = Program(TodoModel).init(init.gpa, init.io, init.environ_map);
+    var program = Program(TodoModel).initWithModel(init.gpa, init.io, init.environ_map, .{.pool = pool}, .{});
     defer program.deinit();
-
-    program.model.pool = pool;
     try program.run();
 }
 
