@@ -9,18 +9,23 @@ const ArrayList = std.ArrayList;
 const Pool = pg.Pool;
 
 const Cmd = zigzag.Cmd;
+const Color = zigzag.Color;
+const Style = zigzag.Style;
 const Tick = zigzag.msg.Tick;
+const Border = zigzag.Border;
 const Context = zigzag.Context;
 const Program = zigzag.Program;
 const KeyEvent = zigzag.KeyEvent;
+const TextInput = zigzag.TextInput;
 const AsyncRunner = zigzag.AsyncRunner;
 
 const TodoModel = struct {
     allocator: Allocator,
     pool: *Pool,
-    count: i32 = 0,
     task: ?AsyncRunner(Msg) = null,
+    input: ?TextInput = null,
     todos: ?ArrayList(TodoItem) = null,
+    item: ?TodoItem = null,
 
     // model contract, this one MUST be called Msg
     pub const Msg = union(enum) {
@@ -38,6 +43,8 @@ const TodoModel = struct {
     // model contract
     pub fn init(model: *TodoModel, _: *Context) Cmd(Msg) {
         model.task = AsyncRunner(Msg).init(model.allocator);
+        model.input = TextInput.init(model.allocator);
+        model.input.?.setPlaceholder("Enter new todo...");
         model.todos = .empty;
 
         model.initDb() catch return .quit;
@@ -48,12 +55,10 @@ const TodoModel = struct {
 
     // optional model contract
     pub fn deinit(self: *TodoModel) void {
-        if (self.task) |*t| {
-            t.deinit();
-        }
-        if (self.todos) |*t| {
-            t.deinit(self.allocator);
-        }
+        self.task.?.deinit();
+        self.todos.?.deinit(self.allocator);
+        self.input.?.deinit();
+
     }
 
     // model contract
@@ -61,10 +66,10 @@ const TodoModel = struct {
         switch (msg) {
             .key => |k| {
                 switch (k.key) {
-                    .up => self.count += 1,
-                    .down => self.count -= 1,
-                    .escape => return .quit,
-                    else => {},
+                    // .up => self.count += 1,
+                    // .down => self.count -= 1,
+                    .enter => self.input.?.setValue("") catch {},
+                    else => self.input.?.handleKey(k),
                 }
             },
             .tick => {
@@ -76,7 +81,19 @@ const TodoModel = struct {
 
     // model contract
     pub fn view(self: *const TodoModel, ctx: *const Context) ![]const u8 {
-        return try std.fmt.allocPrint(ctx.allocator, "{d}", .{self.count});
+        var title_style: Style = .{};
+        title_style = title_style.bold(true);
+        title_style = title_style.fg(Color.green);
+        title_style = title_style.paddingAll(1);
+        title_style = title_style.alignH(.center);
+        const title = try title_style.render(ctx.allocator, "Todo App");
+
+        var input_style: Style = .{};
+        input_style = input_style.borderAll(Border.rounded);
+        input_style = input_style.borderForeground(Color.cyan);
+        const input = try input_style.render(ctx.allocator, try self.input.?.view(ctx.allocator));
+
+        return try std.fmt.allocPrint(ctx.allocator, "{s}\n{s}", .{title, input});
     }
 
     // custom contract, check database sanity
@@ -95,7 +112,7 @@ const TodoModel = struct {
         _ = try con.exec(q, .{});
     }
 
-    // custom contract check app state
+    // custom contract, set app state
     pub fn listTodos(model: *TodoModel) !void {
         model.todos.?.clearAndFree(model.allocator);
 
@@ -117,8 +134,15 @@ const TodoModel = struct {
         }
     }
 
-    pub fn addTodo(_: *TodoModel) !void {}
-    pub fn todoDone(_: *TodoModel) !void {}
+    pub fn addTodo(model: *TodoModel, item: TodoItem) !void {
+        _ = model;
+        _ = item;
+    }
+
+    pub fn todoDone(model: *TodoModel, item: TodoItem) !void {
+        _ = model;
+        _ = item;
+    }
 };
 
 // sample entry point
