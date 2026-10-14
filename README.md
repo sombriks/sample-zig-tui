@@ -73,3 +73,8 @@ On the other hand, Evebted/IOUring remains broken, if in need of
 high-performance concurrency, keep relying on [zio][zio].
 
 [zio]: https://github.com/lalinsky/zio
+
+One cool behavior that zig encourages developers to do is to read the 
+sources from third-party libraries. It's often a good way to grow repertory 
+and solve quick questions. Some projects even include examples in their 
+packages, making library sources read even better.

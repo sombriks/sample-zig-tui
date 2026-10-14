@@ -58,7 +58,6 @@ const TodoModel = struct {
         self.task.?.deinit();
         self.todos.?.deinit(self.allocator);
         self.input.?.deinit();
-
     }
 
     // model contract
@@ -68,7 +67,7 @@ const TodoModel = struct {
                 switch (k.key) {
                     // .up => self.count += 1,
                     // .down => self.count -= 1,
-                    .enter => self.input.?.setValue("") catch {},
+                    .enter => self.addTodo() catch {},
                     else => self.input.?.handleKey(k),
                 }
             },
@@ -89,11 +88,12 @@ const TodoModel = struct {
         const title = try title_style.render(ctx.allocator, "Todo App");
 
         var input_style: Style = .{};
-        input_style = input_style.borderAll(Border.rounded);
+        input_style = input_style.borderAll(Border.normal);
+        input_style = input_style.width(150);
         input_style = input_style.borderForeground(Color.cyan);
         const input = try input_style.render(ctx.allocator, try self.input.?.view(ctx.allocator));
 
-        return try std.fmt.allocPrint(ctx.allocator, "{s}\n{s}", .{title, input});
+        return try std.fmt.allocPrint(ctx.allocator, "{s}\n{s}\ntotal: {d}", .{ title, input, self.todos.?.items.len });
     }
 
     // custom contract, check database sanity
@@ -134,9 +134,18 @@ const TodoModel = struct {
         }
     }
 
-    pub fn addTodo(model: *TodoModel, item: TodoItem) !void {
-        _ = model;
-        _ = item;
+    pub fn addTodo(model: *TodoModel) !void {
+        const q =
+            \\insert into todos(description)
+            \\values ($1);
+        ;
+
+        var con = try model.pool.acquire();
+        defer con.release();
+
+        _ = try con.exec(q, .{model.input.?.getValue()});
+        try model.input.?.setValue("");
+        try model.listTodos();
     }
 
     pub fn todoDone(model: *TodoModel, item: TodoItem) !void {

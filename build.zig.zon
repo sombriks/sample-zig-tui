@@ -4,7 +4,7 @@
     .fingerprint = 0x6767e375adffaa57, // Changing this has security and trust implications.
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
-        .zigzag = .{
+                                                            .zigzag = .{
             .url = "git+https://github.com/sombriks/zigzag?ref=main#8cb26a1fd27a65aa61757b2d66d168c7eb91a5d4",
             .hash = "zigzag-0.1.7-YXwYS8sjEwDBfyibZxgq4YMU-GRXD_qgtePvgGWZF3-g",
         },
