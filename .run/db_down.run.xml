@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="db" type="ZIGBRAINS_BUILD" factoryName="ZIGBRAINS_BUILD">
+  <configuration default="false" name="db:down" type="ZIGBRAINS_BUILD" factoryName="ZIGBRAINS_BUILD">
     <ZigBrainsOption name="workingDirectory" value="$PROJECT_DIR$" />
     <envs />
-    <ZigBrainsOption name="buildSteps" value="db" />
+    <ZigBrainsOption name="buildSteps" value="db:down" />
     <ZigBrainsOption name="compilerArgs" value="" />
     <ZigBrainsOption name="debugBuildSteps" value="" />
     <ZigBrainsOption name="debugCompilerArgs" value="" />

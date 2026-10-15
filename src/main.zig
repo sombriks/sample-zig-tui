@@ -44,6 +44,7 @@ const TodoModel = struct {
     // model contract
     pub fn init(model: *TodoModel, _: *Context) Cmd(Msg) {
         model.tasks = AsyncRunner(Msg).init(model.allocator);
+        _ = model.tasks.?.spawnWithArg(*TodoModel, model, &todoListener);
         model.input = TextInput.init(model.allocator);
         model.input.?.setPlaceholder("Enter new todo...");
         model.todos = .empty;
@@ -151,7 +152,9 @@ const TodoModel = struct {
 
         _ = try con.exec(q, .{model.input.?.getValue()});
         try model.input.?.setValue("");
-        try model.listTodos();
+        // notify all postgres clients clients listening in the channel
+        _ = try con.exec("notify ch_todos, 'new todo added';", .{});
+
     }
 
     pub fn todoDone(model: *TodoModel, item: TodoItem) !void {
@@ -159,8 +162,22 @@ const TodoModel = struct {
         _ = item;
     }
 
+    // vList contract
     fn renderItem(item: TodoItem, _: usize, _: bool, allocator: std.mem.Allocator) []const u8 {
         return std.fmt.allocPrint(allocator, "{s}", .{item.description}) catch "?";
+    }
+
+    // async task contract + pg listener
+    fn todoListener(model: *TodoModel) ?Msg {
+        var listener = model.pool.newListener() catch return null;
+        defer listener.deinit();
+
+        listener.listen("ch_todos", .{}) catch return null;
+        while (listener.next()) |n| {
+            _ = n;
+            model.listTodos() catch unreachable; // silent failure
+        }
+        return null;
     }
 };
 

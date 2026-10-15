@@ -39,8 +39,12 @@ pub fn build(b: *std.Build) void {
     const clean_cmd = b.addSystemCommand(&.{ "rm", "-rf", ".zig-cache", "zig-pkg", "zig-out/" });
     const clean_step = b.step("clean", "wipe the kitchen");
     clean_step.dependOn(&clean_cmd.step);
-    // custom step: db
-    const db_cmd = b.addSystemCommand(&.{ "podman", "compose", "-f", "src/infra/database.yml", "up", "-d" });
-    const db_step = b.step("db", "Start development database using podman compose");
-    db_step.dependOn(&db_cmd.step);
+    // custom step: db:up
+    const db_up_cmd = b.addSystemCommand(&.{ "podman", "compose", "-f", "src/infra/database.yml", "up", "-d" });
+    const db_up_step = b.step("db:up", "Start development database using podman compose");
+    db_up_step.dependOn(&db_up_cmd.step);
+    // custom step: db:down
+    const db_down_cmd = b.addSystemCommand(&.{ "podman", "compose", "-f", "src/infra/database.yml", "down" });
+    const db_down_step = b.step("db:down", "Stop development database using podman compose");
+    db_down_step.dependOn(&db_down_cmd.step);
 }
