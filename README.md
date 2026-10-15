@@ -4,6 +4,8 @@
 
 Another zig experiment
 
+![sample.png](sample.png)
+
 ## Motivation
 
 I want to experiment with zig, simple user interfaces and cool PostgreSQL 
