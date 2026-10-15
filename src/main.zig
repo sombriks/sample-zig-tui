@@ -31,7 +31,6 @@ const TodoModel = struct {
     // model contract, this one MUST be called Msg
     pub const Msg = union(enum) {
         key: KeyEvent,
-        tick: Tick,
     };
 
     // our item
@@ -74,9 +73,6 @@ const TodoModel = struct {
                     .enter => self.addTodo() catch {},
                     else => self.input.?.handleKey(k),
                 }
-            },
-            .tick => {
-                return .none;
             },
         }
         return .none;
