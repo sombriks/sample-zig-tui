@@ -4,7 +4,6 @@ const zigzag = @import("zigzag");
 const pg = @import("pg");
 
 const Allocator = std.mem.Allocator;
-const ArrayList = std.ArrayList;
 
 const Pool = pg.Pool;
 
@@ -17,15 +16,15 @@ const Context = zigzag.Context;
 const Program = zigzag.Program;
 const KeyEvent = zigzag.KeyEvent;
 const TextInput = zigzag.TextInput;
+const StyledList = zigzag.StyledList;
 const AsyncRunner = zigzag.AsyncRunner;
 
 const TodoModel = struct {
     allocator: Allocator,
     pool: *Pool,
     task: ?AsyncRunner(Msg) = null,
+    todos: ?StyledList = null,
     input: ?TextInput = null,
-    todos: ?ArrayList(TodoItem) = null,
-    item: ?TodoItem = null,
 
     // model contract, this one MUST be called Msg
     pub const Msg = union(enum) {
@@ -45,7 +44,8 @@ const TodoModel = struct {
         model.task = AsyncRunner(Msg).init(model.allocator);
         model.input = TextInput.init(model.allocator);
         model.input.?.setPlaceholder("Enter new todo...");
-        model.todos = .empty;
+        model.todos = StyledList.init(model.allocator);
+        model.todos.?.setEnumerator(.roman);
 
         model.initDb() catch return .quit;
         model.listTodos() catch return .quit;
@@ -56,8 +56,8 @@ const TodoModel = struct {
     // optional model contract
     pub fn deinit(self: *TodoModel) void {
         self.task.?.deinit();
-        self.todos.?.deinit(self.allocator);
         self.input.?.deinit();
+        self.todos.?.deinit();
     }
 
     // model contract
@@ -80,20 +80,22 @@ const TodoModel = struct {
 
     // model contract
     pub fn view(self: *const TodoModel, ctx: *const Context) ![]const u8 {
-        var title_style: Style = .{};
-        title_style = title_style.bold(true);
-        title_style = title_style.fg(Color.green);
-        title_style = title_style.paddingAll(1);
-        title_style = title_style.alignH(.center);
+        var title_style = (Style{})
+            .bold(true)
+            .paddingAll(1)
+            .fg(Color.green)
+            .alignH(.center);
         const title = try title_style.render(ctx.allocator, "Todo App");
 
-        var input_style: Style = .{};
-        input_style = input_style.borderAll(Border.normal);
-        input_style = input_style.width(150);
-        input_style = input_style.borderForeground(Color.cyan);
+        var input_style = (Style{})
+            .width(50)
+            .borderAll(Border.normal)
+            .borderForeground(Color.cyan);
         const input = try input_style.render(ctx.allocator, try self.input.?.view(ctx.allocator));
 
-        return try std.fmt.allocPrint(ctx.allocator, "{s}\n{s}\ntotal: {d}", .{ title, input, self.todos.?.items.len });
+        const list = try self.todos.?.view(ctx.allocator);
+
+        return try std.fmt.allocPrint(ctx.allocator, "{s}\n{s}\n{s}", .{ title, input, list });
     }
 
     // custom contract, check database sanity
@@ -114,23 +116,19 @@ const TodoModel = struct {
 
     // custom contract, set app state
     pub fn listTodos(model: *TodoModel) !void {
-        model.todos.?.clearAndFree(model.allocator);
-
         const q =
             \\     select id, description, done
             \\      from todos
-            \\ ordeer by created dec, description asc;
+            \\ order by created;
         ;
 
         var con = try model.pool.acquire();
         defer con.release();
 
-        var result = try con.queryOpts(q, .{}, .{ .column_names = true });
+        var result = try con.query(q, .{});
         defer result.deinit();
-
-        var mapper = result.mapper(TodoItem, .{ .dupe = true });
-        while (try mapper.next()) |item| {
-            try model.todos.?.append(model.allocator, item);
+        while (try result.next()) |row| {
+            try model.todos.?.addItem(try row.get([]const u8,1));
         }
     }
 
@@ -168,7 +166,27 @@ pub fn main(init: std.process.Init) !void {
 }
 
 test "should create program" {
-    // var program = Program(Model).init(std.testing.gpa, std.testing.io, std.testing.environ_map);
-    // defer program.deinit();
+    // var todos: ?ArrayList(struct {
+    //     id: i32,
+    //     description: []const u8,
+    //     done: bool,
+    // }) = null;
+    // todos = .empty;
+    // defer todos.?.deinit(std.testing.allocator);
+    //
+    // const uri = try std.Uri.parse("postgresql://postgres:postgres@localhost:5432/sample");
+    // const pool = try Pool.initUri(std.testing.io, std.testing.allocator, uri, .{ .size = 5 });
+    // defer pool.deinit();
+    //
+    // var con = try pool.acquire();
+    // defer con.release();
+    //
+    // const result = try con.query("select * from todos;", .{});
+    // defer result.deinit();
+    //
+    // while (try result.next()) |row| {
+    //     try todos.?.append(std.testing.allocator, .{ .id = try row.get(i32, 0), .description = try row.get([]const u8, 1), .done = try row.get(bool, 2) });
+    // }
+    // std.debug.print("{any}", .{todos.?.items.len});
     try std.testing.expect(true);
 }

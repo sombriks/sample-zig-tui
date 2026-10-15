@@ -4,9 +4,9 @@
     <envs />
     <ZigBrainsOption name="buildSteps" value="run" />
     <ZigBrainsOption name="compilerArgs" value="" />
-    <ZigBrainsOption name="debugBuildSteps" value="" />
+    <ZigBrainsOption name="debugBuildSteps" value="run" />
     <ZigBrainsOption name="debugCompilerArgs" value="" />
-    <ZigBrainsOption name="exePath" value="" />
+    <ZigBrainsOption name="exePath" value="$PROJECT_DIR$/zig-out/bin/sample_zig_tui" />
     <ZigBrainsOption name="exeArgs" value="" />
     <method v="2" />
   </configuration>
