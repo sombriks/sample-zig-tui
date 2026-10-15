@@ -57,7 +57,7 @@ running. You can spin it up easily with the following command:
 [db]: src/infra/database.yml
 
 ```bash
-zig build db
+zig build db:up
 ```
 
 Then you can run the sample app:
